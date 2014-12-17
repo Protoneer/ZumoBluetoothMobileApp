@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+    <title></title>
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+    <script src="js/errors.js"></script>
+
+    <!-- Bootstrap -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap.min.css">
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/js/bootstrap.min.js"></script>
+
+
+    <script>
+        $(document).ready(function(){
+            var canvasHeight = $('#Canvas1').height();
+            var canvasWidth = $('#Canvas1').width();
+            var mX = 0;
+            var mY = 0;
+            var mXold =0;
+            var mYold = 0;
+            var cmdSender = setInterval(doCmdSender, 100);
+
+            function doCmdSender(){
+                if(!(mX == mXold) || !(mY == mYold)){
+                    //$('#cmdList').append('<li>' + "mX=" + ConvertToPercentage(mX,200) + " mY=" + ConvertToPercentage(mY,200) + '</li>');
+                    mXold = mX;
+                    mYold =mY;
+                }
+
+            }
+
+            function init(){
+                var canvas = document.getElementById("Canvas1");
+                canvas.width = window.innerWidth -25;
+                canvas.height = window.innerWidth -25;
+
+                canvas.addEventListener("touchstart",doTouchStart,false);
+                canvas.addEventListener("touchmove",doTouchMove,false);
+                canvas,addEventListener("touchend", doTouchEnd,false);
+            }
+
+            function doTouchStart(event){
+                event.preventDefault();
+                canvas_x = event.targetTouches[0].pageX;
+                canvas_y = event.targetTouches[0].pageY;
+            }
+
+            function MaxPlusMinusVale(value,max) {
+                if (Math.abs(value) > max) {
+                    if (value > 0) {
+                        value = max;
+                    }
+                    else {
+                        value = -max;
+                    }
+                }
+                return value;
+            }
+
+            function KeepInRange(value,min,max) {
+                if (value > max) {
+                    value = max;
+                }
+                if (value < min) {
+                    value = min;
+                }
+                return value;
+            }
+
+            function ConvertToPercentage(value,max){
+                var result;
+                result = Math.round(Math.abs(value)/max*10);
+                if(value < 0){
+                    result = -result;
+                }
+
+                return result;
+            }
+
+
+
+            function doTouchMove(event){
+                event.preventDefault();
+
+                canvas_x_move = event.targetTouches[0].pageX;
+                canvas_y_move = event.targetTouches[0].pageY;
+
+                mY = Math.round(canvas_y - canvas_y_move);
+                mX = Math.round(canvas_x_move - canvas_x);
+
+                // prevent moving outside canvas
+                canvas_y_move = KeepInRange(canvas_y_move,0,canvasHeight);
+                canvas_x_move = KeepInRange(canvas_x_move,0,canvasWidth);
+
+                // Max movement is half canvas size
+                mY = MaxPlusMinusVale(mY,canvasHeight/2);
+                mX = MaxPlusMinusVale(mX,canvasWidth/2);
+
+                $('#moveXY').text("mX=" + ConvertToPercentage(mX,200) + " mY=" + ConvertToPercentage(mY,200));
+            }
+
+            function doTouchEnd(event){
+                mX = 0
+                mY = 0;
+                $('#moveXY').text("mX=" + 0 + " mY=" + 0);
+            }
+
+            init();
+        });
+    </script>
+</head>
+<body role="document">
+    <div class="container theme-showcase" role="main">
+        <div class="page-header">
+            <h1>Touch Control</h1>
+        </div>
+        <canvas width="400" height="400" id="Canvas1" style="background-color: lightgray">
+            Canvas tag not supported
+        </canvas><br>
+        <button type="button" class="btn btn-lg btn-default" onClick="history.go(0)" VALUE="Refresh">Refresh</button>
+        <a id="moveXY">-</a><br>
+        <ul id='cmdList'></ul>
+    </div>
+
+
+
+</body>
+</html>
